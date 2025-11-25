@@ -1,0 +1,111 @@
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    max-width: 600px; /* 채팅창 너비 제한 */
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    color: #ff85a1; /* MOABOM 색상 */
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+/* 채팅 메시지 영역 */
+.chat-box {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: white;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* 개별 메시지 스타일 */
+.msg {
+    max-width: 80%;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 15px;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+/* 봇 메시지 */
+.bot {
+    background-color: #f0f0f0;
+    align-self: flex-start;
+    margin-right: auto;
+    border-top-left-radius: 5px;
+}
+
+/* 사용자 메시지 */
+.user {
+    background-color: #ff85a1;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+    border-top-right-radius: 5px;
+}
+
+/* 입력 섹션 */
+.input-section {
+    padding: 10px 0;
+}
+
+/* FAQ 버튼 */
+.faq-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 8px;
+}
+
+.faq-buttons button {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.faq-buttons .back-btn {
+    background-color: #333;
+    color: white;
+    border: none;
+}
+
+/* 입력창 */
+.input-area {
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    overflow: hidden;
+    background-color: white;
+}
+
+.input-area input {
+    flex-grow: 1;
+    padding: 12px 18px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.input-area button {
+    background-color: #ff85a1;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    font-size: 20px;
+    cursor: pointer;
+}

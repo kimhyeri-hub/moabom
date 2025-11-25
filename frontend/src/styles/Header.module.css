@@ -1,0 +1,41 @@
+/* src/styles/Header.module.css */
+
+.header {
+  width: 100%;
+  padding: 15px; 
+  display: flex;
+  align-items: center;
+  
+  justify-content: center; 
+  position: relative; 
+  background-color: #fff5f8; 
+  border-bottom: none; 
+  box-shadow: none; 
+}
+
+.left {
+  cursor: pointer;
+  padding: 5px;
+  
+
+  position: absolute; 
+  left: 15px; 
+}
+
+.nav {
+  display: flex;
+
+  gap: 300px; 
+
+  font-size: 16  px; 
+  
+
+  margin-left: -50px; 
+  
+  color: #333;
+}
+
+.navItem {
+  cursor: pointer;
+  padding: 5px 0;
+}

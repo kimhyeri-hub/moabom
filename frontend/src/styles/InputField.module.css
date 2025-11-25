@@ -1,0 +1,19 @@
+/* src/styles/InputField.module.css */
+
+.input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
+  outline: none;
+}
+
+.input::placeholder {
+  color: #aaa;
+}
+
+.input:focus {
+  border-color: #ffb6c1; 
+}

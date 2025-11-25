@@ -1,0 +1,316 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f7f7f7; /* 페이지 전체 배경색 */
+    width: 100%;
+}
+
+
+/* 1. 헤더 스타일 (왼쪽부터 균등 간격 배치) */
+.header {
+    width: 100%;
+    background-color: white; 
+    display: flex;
+    /* 핵심: headerWrapper 전체를 화면 중앙으로 이동 */
+    justify-content: center; 
+    align-items: center;
+    
+    padding: 15px 40px; 
+    position: relative; 
+    z-index: 1000;
+    box-sizing: border-box; 
+    border-bottom: 1px solid #eee; 
+}
+
+/* 2. headerWrapper: 로고와 nav 컨테이너 사이의 간격을 설정합니다. */
+.headerWrapper {
+    display: flex;
+    align-items: center;
+    gap: 250px; 
+}
+
+/* 3. nav: 메뉴 링크들 사이의 간격을 설정합니다. */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 250px; 
+}
+
+/* 4. logo & navLink (폰트 스타일 통일) */
+.logo {
+    font-size: 14px; 
+    font-weight: bold; 
+    color: #ff85a1;
+    white-space: nowrap; 
+}
+.navLink {
+    text-decoration: none;
+    color: #333; 
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap; 
+}
+
+.mainBanner {
+    position: relative;
+    height: 550px;
+    width: 100%; 
+    
+    /* [수정] 배경 이미지 경로는 HomePage.jsx에서 인라인 스타일로 처리합니다. */
+    /* background-image: url('../assets/images/ex.jpg'); */ 
+    
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    
+    color: white;
+    display: flex;
+    justify-content: center; 
+    padding-top: 0; 
+}
+
+/* 배너 내부 콘텐츠 래퍼 (중앙 정렬 및 텍스트 위치 조정) */
+.bannerWrapper {
+    max-width: 1200px; 
+    width: 100%; 
+    height: 100%;
+    display: flex; 
+    align-items: flex-start; 
+    justify-content: flex-start; 
+    
+    padding: 130px 40px 0 40px;
+    box-sizing: border-box; 
+}
+
+.bannerContent {
+    text-align: left;
+    max-width: 400px; 
+}
+
+.bannerTitle {
+    font-size: 40px; 
+    font-weight: 800; 
+    line-height: 1.2;
+    margin: 0 0 20px 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4); 
+}
+
+.bannerButtons {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px; 
+}
+
+.supportButton {
+    background-color: #ff85a1; 
+    color: white;
+    border: 1px solid #ff85a1;
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.loginButton {
+    background-color: white;
+    color: #555; 
+    border: 1px solid #ddd; 
+    padding: 10px 20px; 
+    border-radius: 6px; 
+    font-weight: bold;
+    cursor: pointer;
+}
+
+
+/* 3. 메인 콘텐츠 영역 (중앙 정렬) */
+.contentArea {
+    max-width: 1200px; 
+    margin: 0 auto; 
+    width: 100%;
+    padding: 0 40px; 
+    box-sizing: border-box;
+}
+
+/* 4. 검색창 스타일 */
+.searchBarContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+
+/* 검색창 입력 필드 스타일 수정 */
+.searchBarInput {
+    width: 900px; 
+    padding: 18px 25px; 
+    font-size: 16px;
+    
+    /* 테두리 스타일 */
+    border: 1px solid #ccc;
+    border-radius: 25px; 
+}
+
+
+/* 5. 섹션 제목 */
+.sectionTitle {
+    font-size: 20px; 
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    margin-top: 30px; 
+}
+
+/* 6. 전체 너비 카드 */
+.fullWidthCard {
+    width: 100%;
+    height: 150px;
+    background-color: white; 
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eee;
+    margin-bottom: 30px;
+}
+
+/* 7. 페이지네이션/슬라이더 컨트롤 */
+.paginationControls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.paginationButton {
+    background-color: #333;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px; 
+}
+
+/* 8. 스크롤 버튼 그룹 */
+.scrollControls {
+    display: flex;
+    gap: 10px;
+}
+
+/* 9. 스크롤 버튼 스타일 */
+.scrollButton {
+    background: #eee;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 30px; 
+    text-align: center;
+    transition: background 0.2s;
+}
+
+.scrollButton:hover {
+    background: #ccc;
+}
+
+
+/* 10. 그리드 섹션: 가로 스크롤 활성화 */
+.gridSection {
+    display: flex;
+    overflow-x: scroll; 
+    overflow-y: hidden; 
+    flex-wrap: nowrap; 
+    gap: 20px; 
+    
+    -ms-overflow-style: none; /* IE 및 Edge 스크롤바 숨김 */
+    scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+}
+.gridSection::-webkit-scrollbar {
+    display: none; /* Chrome, Safari 스크롤바 숨김 */
+}
+
+/* 11. 카드 스타일 수정 (이미지 포함 구조) */
+.card {
+    /* 카드의 너비를 고정하여 스크롤 시 일정하게 보이도록 합니다. */
+    flex: 0 0 350px; 
+    height: 300px; 
+    
+    /* 이미지와 텍스트를 수직으로 배치하기 위해 column으로 변경 */
+    display: flex; 
+    flex-direction: column;
+    justify-content: flex-start; /* 상단부터 채우도록 설정 */
+    align-items: stretch; /* 전체 너비를 사용하도록 설정 */
+
+    background-color: white;
+    border-radius: 15px; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); 
+    text-decoration: none; 
+    color: #333; 
+}
+
+/* 12. 카드 이미지 컨테이너 스타일 추가 */
+.cardImageContainer {
+    /* 카드 전체 높이의 약 50%를 차지하도록 설정 */
+    height: 150px;
+    overflow: hidden;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+/* 13. 실제 이미지 스타일 */
+.cardImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 이미지가 컨테이너를 가득 채우도록 합니다. */
+}
+
+/* 14. 카드 텍스트 내용 스타일 추가 */
+.cardContent {
+    /* 나머지 150px를 차지하도록 설정 */
+    height: 150px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.cardCategory {
+    font-size: 13px;
+    font-weight: 500;
+    color: #ff85a1; /* 핑크색 강조 */
+    margin-bottom: 5px;
+}
+
+.cardTitle {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    /* 텍스트가 넘치면 ...으로 표시 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cardDetail {
+    font-size: 14px;
+    color: #666;
+    /* 2줄까지만 표시하고 생략 */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}

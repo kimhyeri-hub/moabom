@@ -1,0 +1,106 @@
+.contentWrapper {
+    max-width: 900px; 
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* 알림 페이지 제목 */
+.alertHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.mainTitle {
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
+}
+
+.readAllButton {
+    background-color: transparent;
+    border: none;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: color 0.2s;
+}
+
+.readAllButton:hover {
+    color: #ff85a1;
+}
+
+.divider {
+    height: 1px;
+    background-color: #eee;
+    margin-bottom: 30px;
+}
+
+/* --- 알림 카드 목록 --- */
+.alertList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.alertCard {
+    position: relative;
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 25px 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    border: 1px solid #f0f0f0;
+}
+
+.alertCard:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 읽지 않은 알림 스타일: 더 밝은 배경색과 왼쪽 핑크색 표시 */
+.unread {
+    background-color: #fff7f9; /* 읽지 않은 알림을 강조 */
+    border-left: 5px solid #ff85a1; /* 핑크색 하이라이트 */
+}
+
+/* 읽지 않은 알림을 표시하는 빨간 원 (읽지 않은 경우에만 표시됨) */
+.unreadDot {
+    position: absolute;
+    top: 20px;
+    left: -10px; 
+    width: 15px;
+    height: 15px;
+    background-color: #ff85a1; 
+    border-radius: 50%;
+}
+
+
+.date {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 15px;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.type {
+    color: #ff85a1; /* 공지사항 타입 강조 */
+    font-weight: 700;
+    margin-right: 5px;
+}
+
+.content {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+    white-space: pre-wrap; /* \n 개행 문자 적용 */
+}

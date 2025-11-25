@@ -1,0 +1,8 @@
+pip freeze > requirements.txt 개발환경 덮어 씌우기
+pip install -r requirements.txt 개발환경 다운
+.\Djangoenv\Scripts\activate 가상환경 Django
+python manage.py startapp 앱이름 - 폴더 생성
+deactivate 가상환경 종료
+python manage.py runserver 서버 실행
+ctrl + c 서버 종료
+
