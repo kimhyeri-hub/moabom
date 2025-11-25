@@ -1,61 +1,77 @@
 import React, { useState } from 'react';
-// ⭐ 1. CSS 모듈로 임포트 경로를 수정합니다. ⭐
-import styles from '../styles/ChatPage.module.css'; 
+import styles from '../styles/ChatPage.module.css';
 
 function ChatPage() {
   const [messages, setMessages] = useState([
-    { sender: 'bot', text: '안녕하세요! 모아입니다. \n 도움이 필요하신가요?' }
+    { sender: 'bot', text: '안녕하세요! 모아입니다. 무엇을 도와드릴까요?' }
   ]);
   const [input, setInput] = useState('');
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    setMessages([...messages, { sender: 'user', text: input }]);
+
+    const userText = input;
+
+    // 1) 사용자 메시지 추가
+    setMessages(prev => [...prev, { sender: 'user', text: userText }]);
     setInput('');
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { sender: 'bot', text: '답변 준비 중이에요!' }]);
-    }, 300);
+    try {
+      // 2) Django API 호출
+      const res = await fetch("http://127.0.0.1:8000/api/chat/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: userText })
+      });
+
+      const data = await res.json();
+
+      // 3) GPT 답변 추가
+      if (data.reply) {
+        setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
+      } else {
+        setMessages(prev => [
+          ...prev,
+          { sender: 'bot', text: "서버에서 응답이 없어요 😢" }
+        ]);
+      }
+
+    } catch (err) {
+      console.log("Chat API error", err);
+      setMessages(prev => [
+        ...prev,
+        { sender: 'bot', text: "서버 통신 오류가 발생했어요 😥" }
+      ]);
+    }
   };
 
   return (
-    // ⭐ 2. 모든 className을 styles.클래스명 으로 수정합니다. ⭐
     <div className={styles['chat-container']}>
       <h1>😊 모아</h1>
 
-      {/* 채팅 메시지 영역 */}
       <div className={styles['chat-box']}>
         {messages.map((msg, idx) => (
-          <div key={idx} className={`${styles.msg} ${msg.sender === 'user' ? styles.user : styles.bot}`}>
-            {/* Note: 'user'와 'bot' 클래스도 styles에서 가져와야 함 */}
+          <div
+            key={idx}
+            className={`${styles.msg} ${msg.sender === 'user' ? styles.user : styles.bot}`}
+          >
             {msg.text}
           </div>
         ))}
       </div>
 
-      {/* 입력창 + FAQ 버튼 */}
-      <div className={styles['input-section']}>
-      
-        <div className={styles['faq-buttons']}>
-          <button>자주 묻는 질문 1</button>
-          <button>자주 묻는 질문 2</button>
-          <button className={styles['back-btn']}>돌아가기</button>
-        </div>
-
-        <div className={styles['input-area']}>
+      <div className={styles['input-area']}>
         <input
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-              handleSend();
-            }
+            if (e.key === 'Enter') handleSend();
           }}
           placeholder="무엇이 궁금하신가요?"
         />
-          <button onClick={handleSend}>➤</button>
-        </div>
-
+        <button onClick={handleSend}>➤</button>
       </div>
     </div>
   );

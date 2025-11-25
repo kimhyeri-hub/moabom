@@ -113,7 +113,7 @@ const HomePage = () => {
 
         {/* 3.3 모아챗 바로가기 섹션 */}
         <h2 className={styles.sectionTitle}>모아챗 바로가기 &gt;</h2>
-        <Link to="/moachat/main" className={styles.fullWidthCard}></Link>
+        <Link to="/moachat" className={styles.fullWidthCard}></Link>
 
 
         {/* 3.4 ⭐ 모아가 추천해요! 섹션 (스크롤 및 Link 적용) ⭐ */}
