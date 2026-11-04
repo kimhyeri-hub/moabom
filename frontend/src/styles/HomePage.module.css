@@ -98,6 +98,7 @@
 
 .bannerButtons {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
     margin-top: 15px; 
 }
@@ -120,6 +121,7 @@
     border-radius: 6px; 
     font-weight: bold;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 
@@ -313,4 +315,9 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     line-height: 1.4;
+}
+.statusLine {
+    color: #666;
+    font-size: 14px;
+    margin: 8px 0 16px 0;
 }

@@ -1,0 +1,173 @@
+[
+  {
+    "grantId": "example-001-youth-transport",
+    "categoryTitle": "예시 카테고리",
+    "keywords": [
+      "교통",
+      "청년"
+    ],
+    "title": "[예시] 모아봄 테스트용 청년 교통비",
+    "description": "실제 정책이 아닙니다. 연령 19세부터 34세, 예시특별시, 소득 1~5분위를 확인하는 가상 데이터입니다.",
+    "endDate": "2026-12-31",
+    "link": "https://example.com/moabom/grants/example-001-youth-transport",
+    "targetAgeGroup": "청년",
+    "minAge": 19,
+    "maxAge": 34,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 5,
+    "targetRegion": "예시특별시",
+    "sample": true,
+    "householdClarity": "UNRESTRICTED",
+    "specialClarity": "UNRESTRICTED",
+    "referenceText": "테스트용 가상 데이터"
+  },
+  {
+    "grantId": "example-002-parenting",
+    "categoryTitle": "양육",
+    "keywords": [
+      "양육",
+      "아동"
+    ],
+    "title": "[예시] 모아봄 테스트용 양육 지원",
+    "description": "실제 정책이 아닙니다. 예시도에 사는 20세부터 45세, 소득 1~3분위용 가상 데이터입니다.",
+    "endDate": "2026-11-30",
+    "link": "https://example.com/moabom/grants/example-002-parenting",
+    "targetAgeGroup": "영유아 보호자",
+    "minAge": 20,
+    "maxAge": 45,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 3,
+    "targetRegion": "예시도",
+    "sample": true,
+    "householdClarity": "UNRESTRICTED",
+    "specialClarity": "UNRESTRICTED",
+    "referenceText": "테스트용 가상 데이터"
+  },
+  {
+    "grantId": "example-003-living-support",
+    "categoryTitle": "생활",
+    "keywords": [
+      "생활",
+      "장년"
+    ],
+    "title": "[예시] 모아봄 테스트용 생활 안정 지원",
+    "description": "실제 정책이 아닙니다. 전국 예시 지역, 50세부터 64세, 소득 2~6분위용 가상 데이터입니다.",
+    "endDate": null,
+    "link": "https://example.com/moabom/grants/example-003-living-support",
+    "targetAgeGroup": "장년",
+    "minAge": 50,
+    "maxAge": 64,
+    "minIncomeBracket": 2,
+    "maxIncomeBracket": 6,
+    "targetRegion": "전국(예시)",
+    "sample": true,
+    "householdClarity": "UNRESTRICTED",
+    "specialClarity": "UNRESTRICTED",
+    "referenceText": "테스트용 가상 데이터"
+  },
+  {
+    "grantId": "example-004-housing",
+    "categoryTitle": "주거",
+    "keywords": [
+      "월세"
+    ],
+    "title": "[예시] 모아봄 테스트용 주거 지원",
+    "description": "실제 정책이 아닙니다. 예시특별시 19세부터 39세, 소득 1~6분위용 가상 데이터입니다.",
+    "endDate": "2026-12-15",
+    "link": "https://example.com/moabom/grants/example-004-housing",
+    "targetAgeGroup": "청년",
+    "minAge": 19,
+    "maxAge": 39,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 6,
+    "targetRegion": "예시특별시",
+    "sample": true,
+    "householdClarity": "UNRESTRICTED",
+    "specialClarity": "UNRESTRICTED",
+    "referenceText": "테스트용 가상 데이터"
+  },
+  {
+    "grantId": "example-005-transit",
+    "categoryTitle": "교통",
+    "keywords": [
+      "버스"
+    ],
+    "title": "[예시] 모아봄 테스트용 대중교통 지원",
+    "description": "실제 정책이 아닙니다. 예시특별시 19세부터 39세, 소득 1~6분위용 가상 데이터입니다.",
+    "endDate": "2026-12-20",
+    "link": "https://example.com/moabom/grants/example-005-transit",
+    "targetAgeGroup": "청년",
+    "minAge": 19,
+    "maxAge": 39,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 6,
+    "targetRegion": "예시특별시",
+    "sample": true,
+    "householdClarity": "UNRESTRICTED",
+    "specialClarity": "UNRESTRICTED",
+    "referenceText": "테스트용 가상 데이터"
+  },
+  {
+    "grantId": "example-006-care",
+    "categoryTitle": "돌봄",
+    "keywords": [
+      "양육"
+    ],
+    "title": "[예시] 모아봄 테스트용 돌봄 지원",
+    "description": "실제 정책이 아닙니다. 스크랩하면 추천 순위가 올라가도록 만든 가상 데이터입니다.",
+    "endDate": "2026-12-25",
+    "link": "https://example.com/moabom/grants/example-006-care",
+    "targetAgeGroup": "보호자",
+    "minAge": 19,
+    "maxAge": 39,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 6,
+    "targetRegion": "예시특별시",
+    "sample": true,
+    "householdClarity": "UNRESTRICTED",
+    "specialClarity": "UNRESTRICTED",
+    "referenceText": "테스트용 가상 데이터"
+  },
+  {
+    "grantId": "example-007-senior",
+    "categoryTitle": "생활",
+    "keywords": [
+      "장년"
+    ],
+    "title": "[예시] 모아봄 테스트용 고령 생활 지원",
+    "description": "실제 정책이 아닙니다. 65세부터 100세만 대상으로 하는 가상 데이터입니다.",
+    "endDate": null,
+    "link": "https://example.com/moabom/grants/example-007-senior",
+    "targetAgeGroup": "고령",
+    "minAge": 65,
+    "maxAge": 100,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 10,
+    "targetRegion": "전국(예시)",
+    "sample": true,
+    "householdClarity": "UNRESTRICTED",
+    "specialClarity": "UNRESTRICTED",
+    "referenceText": "테스트용 가상 데이터"
+  },
+  {
+    "grantId": "example-008-low-income",
+    "categoryTitle": "생활",
+    "keywords": [
+      "생계"
+    ],
+    "title": "[예시] 모아봄 테스트용 저소득 생활 지원",
+    "description": "실제 정책이 아닙니다. 소득 1~2분위만 대상으로 하는 가상 데이터입니다.",
+    "endDate": "2026-10-31",
+    "link": "https://example.com/moabom/grants/example-008-low-income",
+    "targetAgeGroup": "청년",
+    "minAge": 19,
+    "maxAge": 39,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 2,
+    "targetRegion": "예시특별시",
+    "sample": true,
+    "householdClarity": "UNRESTRICTED",
+    "specialClarity": "UNRESTRICTED",
+    "referenceText": "테스트용 가상 데이터"
+  }
+]

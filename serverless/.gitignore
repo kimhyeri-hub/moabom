@@ -1,0 +1,5 @@
+target/
+.aws-sam/
+.gradle/
+*.class
+_dump.py

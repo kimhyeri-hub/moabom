@@ -1,0 +1,17 @@
+{
+  "httpMethod": "GET",
+  "path": "/users/example-user-001/recommendations",
+  "resource": "/users/{id}/recommendations",
+  "pathParameters": {
+    "id": "example-user-001"
+  },
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "httpMethod": "GET",
+    "path": "/users/example-user-001/recommendations",
+    "resourcePath": "/users/{id}/recommendations"
+  },
+  "isBase64Encoded": false
+}

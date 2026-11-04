@@ -1,7 +1,9 @@
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
     width: 100%;
     max-width: 600px; /* 채팅창 너비 제한 */
     margin: 0 auto;

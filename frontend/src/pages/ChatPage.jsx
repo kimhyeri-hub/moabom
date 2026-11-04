@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from '../styles/ChatPage.module.css';
+import { sendChat } from '../api/moabomApi';
 
 function ChatPage() {
   const [messages, setMessages] = useState([
@@ -17,16 +18,7 @@ function ChatPage() {
     setInput('');
 
     try {
-      // 2) Django API 호출
-      const res = await fetch("http://127.0.0.1:8000/api/chat/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: userText })
-      });
-
-      const data = await res.json();
+      const data = await sendChat(userText);
 
       // 3) GPT 답변 추가
       if (data.reply) {

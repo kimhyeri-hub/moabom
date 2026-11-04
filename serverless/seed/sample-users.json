@@ -1,0 +1,27 @@
+{
+  "note": "가상 데이터입니다. 실제 사용자나 정책이 아니며 DynamoDB에 자동으로 들어가지 않습니다.",
+  "users": [
+    {
+      "userId": "example-user-001",
+      "age": 28,
+      "region": "예시특별시",
+      "incomeBracket": 3
+    }
+  ],
+  "behaviors": [
+    {
+      "userId": "example-user-001",
+      "behaviorSk": "VIEW#example-001-youth-transport",
+      "behaviorType": "VIEW",
+      "grantId": "example-001-youth-transport",
+      "occurredAt": "2026-11-01T00:00:00Z"
+    },
+    {
+      "userId": "example-user-001",
+      "behaviorSk": "SCRAP#example-002-parenting",
+      "behaviorType": "SCRAP",
+      "grantId": "example-002-parenting",
+      "occurredAt": "2026-11-02T00:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "httpMethod": "GET",
+  "path": "/grants/example-001-youth-transport",
+  "resource": "/grants/{id}",
+  "pathParameters": {
+    "id": "example-001-youth-transport"
+  },
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "httpMethod": "GET",
+    "path": "/grants/example-001-youth-transport",
+    "resourcePath": "/grants/{id}"
+  },
+  "isBase64Encoded": false
+}

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import styles from '../styles/AlertsPage.module.css';
-import detailStyles from '../styles/DetailPage.module.css'; // 헤더 스타일 재사용
+import detailStyles from '../styles/DetailPage.module.css';
 
 const AlertsPage = () => {
   // 알림 목록 데모 데이터
@@ -53,20 +52,6 @@ const AlertsPage = () => {
     <div className={detailStyles.container}>
       
       {/* 1. 상단 헤더 메뉴 (DetailPage의 CSS를 재사용하여 스타일 유지) */}
-      <header className={detailStyles.header}>
-        <div className={detailStyles.headerWrapper}> 
-          
-          <Link to="/" className={detailStyles.logo}>MOABOM</Link> 
-          
-          <nav className={detailStyles.nav}>
-            <Link to="/mypage" className={detailStyles.navLink}>마이페이지</Link>
-            <Link to="/alerts" className={detailStyles.navLink}>알림</Link>
-            <Link to="/moachat" className={detailStyles.navLink}>모아챗</Link>
-            <Link to="/login" className={detailStyles.navLink}>로그인/회원가입</Link> 
-          </nav>
-        </div>
-      </header>
-      
       {/* 2. 메인 콘텐츠 영역 */}
       <div className={styles.contentWrapper}>
         

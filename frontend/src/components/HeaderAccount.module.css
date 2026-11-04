@@ -1,0 +1,105 @@
+.account,
+.guestLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  width: auto;
+  min-width: 132px;
+  max-width: 168px;
+  min-height: 24px;
+  height: auto;
+  flex: 0 1 auto;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: inherit;
+  line-height: 24px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.accountButton,
+.menuItem {
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: inherit;
+  line-height: 24px;
+  white-space: nowrap;
+}
+
+.accountButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  width: 100%;
+  min-height: 24px;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.loginId {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1001;
+  min-width: 132px;
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #eee;
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 14px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+.guestLink {
+  max-width: none;
+  flex: 0 0 auto;
+}
+
+.menuItem:hover,
+.menuItem:focus-visible,
+.accountButton:focus-visible,
+.guestLink:focus-visible {
+  background: #f7f7f7;
+  outline: 2px solid #333;
+  outline-offset: 2px;
+}
+@media (max-width: 720px) {
+  .account,
+  .guestLink {
+    min-width: 0;
+    max-width: 100%;
+  }
+}

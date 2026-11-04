@@ -1,0 +1,15 @@
+{
+  "httpMethod": "GET",
+  "path": "/grants",
+  "resource": "/grants",
+  "queryStringParameters": null,
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "requestContext": {
+    "httpMethod": "GET",
+    "path": "/grants",
+    "resourcePath": "/grants"
+  },
+  "isBase64Encoded": false
+}

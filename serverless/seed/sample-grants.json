@@ -1,0 +1,53 @@
+[
+  {
+    "entityType": "GRANT",
+    "grantId": "example-001-youth-transport",
+    "categoryTitle": "예시 카테고리",
+    "keywords": ["교통", "청년"],
+    "title": "[예시] 모아봄 테스트용 청년 교통비",
+    "description": "실제 정책이 아닙니다. 목록 API와 연령·지역·소득분위 필드 확인을 위한 가상 데이터입니다.",
+    "endDate": "2026-12-31",
+    "link": "https://example.com/moabom/grants/example-001-youth-transport",
+    "targetAgeGroup": "청년",
+    "minAge": 19,
+    "maxAge": 34,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 5,
+    "targetRegion": "예시특별시",
+    "sample": true
+  },
+  {
+    "entityType": "GRANT",
+    "grantId": "example-002-parenting",
+    "categoryTitle": "예시 카테고리",
+    "keywords": ["양육", "아동"],
+    "title": "[예시] 모아봄 테스트용 양육 지원",
+    "description": "실제 정책이 아닙니다. 추천 조건 필터를 시험하기 위한 가상 데이터입니다.",
+    "endDate": "2026-11-30",
+    "link": "https://example.com/moabom/grants/example-002-parenting",
+    "targetAgeGroup": "영유아 보호자",
+    "minAge": 20,
+    "maxAge": 45,
+    "minIncomeBracket": 1,
+    "maxIncomeBracket": 3,
+    "targetRegion": "예시도",
+    "sample": true
+  },
+  {
+    "entityType": "GRANT",
+    "grantId": "example-003-living-support",
+    "categoryTitle": "예시 카테고리",
+    "keywords": ["생활", "장년"],
+    "title": "[예시] 모아봄 테스트용 생활 안정 지원",
+    "description": "실제 정책이 아닙니다. 마감일이 없는 지원금과 넓은 소득분위 범위를 표현한 가상 데이터입니다.",
+    "endDate": null,
+    "link": "https://example.com/moabom/grants/example-003-living-support",
+    "targetAgeGroup": "장년",
+    "minAge": 50,
+    "maxAge": 64,
+    "minIncomeBracket": 2,
+    "maxIncomeBracket": 6,
+    "targetRegion": "전국(예시)",
+    "sample": true
+  }
+]

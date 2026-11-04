@@ -1,0 +1,147 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  width: 100%;
+  min-height: 98px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  box-sizing: border-box;
+  padding: 24px 40px;
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+.bar {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.logo {
+  flex: 0 0 auto;
+  color: #ff85a1;
+  font-size: 25px;
+  font-weight: bold;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.searchForm {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.searchInput {
+  width: 100%;
+  height: 50px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 18px;
+  border: 2px solid #F3A1B7;
+  border-radius: 14px;
+  background: #fff;
+  color: #333;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.searchInput:focus {
+  border-color: #FF789C;
+  outline: none;
+}
+
+.searchInput::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+.tools {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 8px;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: 8px;
+}
+
+.toolCurrent {
+  color: #ff85a1;
+}
+
+.tool:hover,
+.tool:focus-visible {
+  background: #f7f7f7;
+  outline: 2px solid #333;
+  outline-offset: 2px;
+}
+
+.icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: block;
+}
+
+.toolLabel {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+@media (max-width: 860px) {
+  .header {
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .bar {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+  }
+
+  .searchForm {
+    flex: 1 1 140px;
+    min-width: 120px;
+  }
+
+  .tools {
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .bar > :last-child {
+    margin-left: auto;
+  }
+}

@@ -1,0 +1,589 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  MOABOM serverless grants, authentication, and recommendation API.
+  User, auth, and chat routes are omitted unless EnableUnauthenticatedUserRoutes is true.
+  Do not enable that parameter on a public deployment. This template is not deployed by the build.
+
+Parameters:
+  EnableUnauthenticatedUserRoutes:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Leave false for any shared or public deployment. User handlers still require a bearer token.
+  AuthSecret:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: HS256 secret for Java-issued tokens. Do not commit a real value. Empty rejects user API calls.
+  OpenAiApiKey:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: OpenAI key for the chat Lambda. Leave empty here. The local server does not call OpenAI.
+
+Conditions:
+  CreateUnauthenticatedUserRoutes: !Equals [!Ref EnableUnauthenticatedUserRoutes, "true"]
+
+Globals:
+  Function:
+    Runtime: java25
+    Timeout: 15
+    MemorySize: 512
+    Architectures:
+      - x86_64
+
+Resources:
+  GrantsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: entityType
+          AttributeType: S
+        - AttributeName: grantId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: entityType
+          KeyType: HASH
+        - AttributeName: grantId
+          KeyType: RANGE
+      Tags:
+        - Key: Project
+          Value: moabom
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: moabom
+
+  UserBehaviorsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: behaviorSk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: behaviorSk
+          KeyType: RANGE
+      Tags:
+        - Key: Project
+          Value: moabom
+
+  AccountsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: accountKey
+          AttributeType: S
+      KeySchema:
+        - AttributeName: accountKey
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: moabom
+
+  TokenRevocationsTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: jti
+          AttributeType: S
+      KeySchema:
+        - AttributeName: jti
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+      Tags:
+        - Key: Project
+          Value: moabom
+
+  MoabomGrantsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      Cors:
+        AllowMethods: "'GET,PUT,POST,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  ListGrantsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: moabom-list-grants
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.ListGrantsHandler::handleRequest
+      Description: Returns the grant catalog stored in DynamoDB.
+      Environment:
+        Variables:
+          GRANTS_TABLE_NAME: !Ref GrantsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+              Resource: !GetAtt GrantsTable.Arn
+      Events:
+        GetGrants:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /grants
+            Method: GET
+
+  GetGrantFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: moabom-get-grant
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.GetGrantHandler::handleRequest
+      Description: Returns one grant by id.
+      Environment:
+        Variables:
+          GRANTS_TABLE_NAME: !Ref GrantsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt GrantsTable.Arn
+      Events:
+        GetGrant:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /grants/{id}
+            Method: GET
+
+  ListUserBehaviorsFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-list-user-behaviors
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.ListBehaviorsHandler::handleRequest
+      Description: Local-development behavior history. Requires authentication before any public deployment.
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+          BEHAVIORS_TABLE_NAME: !Ref UserBehaviorsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt UsersTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt TokenRevocationsTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+              Resource: !GetAtt UserBehaviorsTable.Arn
+      Events:
+        GetBehaviors:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /users/{id}/behaviors
+            Method: GET
+
+  RecommendGrantsFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-recommend-grants
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.RecommendHandler::handleRequest
+      Description: Local-development recommendations. Requires authentication before any public deployment.
+      Environment:
+        Variables:
+          GRANTS_TABLE_NAME: !Ref GrantsTable
+          USERS_TABLE_NAME: !Ref UsersTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+          BEHAVIORS_TABLE_NAME: !Ref UserBehaviorsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+              Resource: !GetAtt GrantsTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt UsersTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt TokenRevocationsTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+              Resource: !GetAtt UserBehaviorsTable.Arn
+      Events:
+        GetRecommendations:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /users/{id}/recommendations
+            Method: GET
+
+
+  GetUserProfileFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-get-user-profile
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.GetProfileHandler::handleRequest
+      Description: Local-development profile read. Requires authentication before any public deployment.
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt UsersTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt TokenRevocationsTable.Arn
+      Events:
+        GetProfile:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /users/{id}/profile
+            Method: GET
+
+  PutUserProfileFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-put-user-profile
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.PutProfileHandler::handleRequest
+      Description: Local-development profile write. Requires authentication before any public deployment.
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+              Resource: !GetAtt UsersTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt TokenRevocationsTable.Arn
+      Events:
+        PutProfile:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /users/{id}/profile
+            Method: PUT
+
+  PostUserBehaviorFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-post-user-behavior
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.PostBehaviorHandler::handleRequest
+      Description: Local-development behavior write. Requires authentication before any public deployment.
+      Environment:
+        Variables:
+          GRANTS_TABLE_NAME: !Ref GrantsTable
+          USERS_TABLE_NAME: !Ref UsersTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+          BEHAVIORS_TABLE_NAME: !Ref UserBehaviorsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt GrantsTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt UsersTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt TokenRevocationsTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:GetItem
+              Resource: !GetAtt UserBehaviorsTable.Arn
+      Events:
+        PostBehavior:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /users/{id}/events
+            Method: POST
+
+
+  DeleteScrapFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-delete-scrap
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.DeleteScrapHandler::handleRequest
+      Description: Local-development scrap removal. Requires authentication before any public deployment.
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+          BEHAVIORS_TABLE_NAME: !Ref UserBehaviorsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt UsersTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt TokenRevocationsTable.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:DeleteItem
+              Resource: !GetAtt UserBehaviorsTable.Arn
+      Events:
+        DeleteScrap:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /users/{id}/events
+            Method: DELETE
+
+  SignupFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-signup
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.SignupHandler::handleRequest
+      Description: Account signup. Prepared for deployment and not created unless the user-route flag is true.
+      Environment:
+        Variables:
+          ACCOUNTS_TABLE_NAME: !Ref AccountsTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+              Resource: !GetAtt AccountsTable.Arn
+      Events:
+        Signup:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /auth/signup
+            Method: POST
+
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-login
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.LoginHandler::handleRequest
+      Description: Account login. Prepared for deployment and not created unless the user-route flag is true.
+      Environment:
+        Variables:
+          ACCOUNTS_TABLE_NAME: !Ref AccountsTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+              Resource: !GetAtt AccountsTable.Arn
+      Events:
+        Login:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /auth/login
+            Method: POST
+
+  LogoutFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-logout
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.LogoutHandler::handleRequest
+      Description: Revokes the bearer token jti until it expires.
+      Environment:
+        Variables:
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+              Resource: !GetAtt TokenRevocationsTable.Arn
+      Events:
+        Logout:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /auth/logout
+            Method: POST
+
+  MeFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-me
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.MeHandler::handleRequest
+      Description: Current user read and profile-field update.
+      Environment:
+        Variables:
+          ACCOUNTS_TABLE_NAME: !Ref AccountsTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+          TOKEN_REVOCATIONS_TABLE_NAME: !Ref TokenRevocationsTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+              Resource: !GetAtt AccountsTable.Arn
+      Events:
+        GetMe:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /auth/me
+            Method: GET
+        PatchMe:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /auth/me
+            Method: PATCH
+
+  LoginIdFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-login-id
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.LoginIdHandler::handleRequest
+      Description: Checks whether a login id is available.
+      Environment:
+        Variables:
+          ACCOUNTS_TABLE_NAME: !Ref AccountsTable
+          MOABOM_AUTH_SECRET: !Ref AuthSecret
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+              Resource: !GetAtt AccountsTable.Arn
+      Events:
+        LoginId:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /auth/login-id
+            Method: GET
+
+  ChatFunction:
+    Type: AWS::Serverless::Function
+    Condition: CreateUnauthenticatedUserRoutes
+    Properties:
+      FunctionName: moabom-chat
+      CodeUri: grants-api/
+      Handler: com.moabom.grants.ChatHandler::handleRequest
+      Description: Moabom chat. Uses gpt-4o-mini only when OPENAI_API_KEY is set on the function. Not invoked by local tests.
+      Environment:
+        Variables:
+          OPENAI_API_KEY: !Ref OpenAiApiKey
+      Events:
+        Chat:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MoabomGrantsApi
+            Path: /chat
+            Method: POST
+
+Outputs:
+  GrantsApiUrl:
+    Description: Base URL of the dev stage. Deploying this stack creates billable AWS resources.
+    Value: !Sub "https://${MoabomGrantsApi}.execute-api.${AWS::Region}.amazonaws.com/dev/grants"
+  GrantsTableName:
+    Description: DynamoDB table that stores grant items.
+    Value: !Ref GrantsTable
+  UsersTableName:
+    Description: DynamoDB table that stores local-development user profiles.
+    Value: !Ref UsersTable
+  TokenRevocationsTableName:
+    Description: DynamoDB table that stores revoked JWT ids until expiry.
+    Value: !Ref TokenRevocationsTable
+  AccountsTableName:
+    Description: DynamoDB table that stores account credentials and unique login ids.
+    Value: !Ref AccountsTable

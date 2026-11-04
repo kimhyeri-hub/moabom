@@ -1,10 +1,14 @@
 // src/pages/RegisterPage.jsx
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header'; 
 import styles from '../styles/RegisterPage.module.css';
-import InputField from '../components/InputField'; 
+import InputField from '../components/InputField';
+import { getProfile, saveProfile } from '../api/moabomApi';
+import { checkLoginId, signup, updateAccount } from '../api/authApi';
+import { useAuth } from '../auth/AuthContext';
+import { HOUSEHOLD_OPTIONS, SPECIAL_OPTIONS, codesFor, labelsFor } from '../api/policyLabels'; 
 
 // 임시 버튼 컴포넌트 (type="button"으로 폼 제출 방지)
 const TagButton = ({ children, isSelected, onClick }) => (
@@ -20,6 +24,18 @@ const TagButton = ({ children, isSelected, onClick }) => (
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { user, token, setSession } = useAuth();
+  const [account, setAccount] = useState({
+    name: '',
+    loginId: '',
+    password: '',
+    dateOfBirth: '',
+    email: '',
+  });
+
+  const updateField = (field) => (event) => {
+    setAccount((current) => ({ ...current, [field]: event.target.value }));
+  };
 
   // ⭐ 상태를 배열로 초기화하여 다중 선택 허용 ⭐
   const [selectedTags, setSelectedTags] = useState({
@@ -27,7 +43,8 @@ const RegisterPage = () => {
       가구형태: [],
       소득분위: [],
       지역: [],
-      특수조건: []
+      특수조건: [],
+      관심분야: [],
   });
 
   const handleTagClick = (group, value) => {
@@ -54,12 +71,102 @@ const RegisterPage = () => {
     navigate(-1);
   };
 
-  const handleRegisterSubmit = (e) => {
+  const [formMessage, setFormMessage] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setAccount((current) => ({
+        ...current,
+        name: user.name || '',
+        loginId: user.loginId || '',
+        email: user.email || '',
+        dateOfBirth: user.dateOfBirth ? user.dateOfBirth.replace(/-/g, '') : '',
+      }));
+    }
+    if (!user || !token) {
+      return undefined;
+    }
+    getProfile(user.id, token)
+      .then((profile) => {
+        const ageTag = profile.age >= 60 ? '60대 이상' : `${Math.floor(profile.age / 10)}0대`;
+        const incomeTag = `${profile.incomeBracket}분위`;
+        setSelectedTags((current) => ({
+          ...current,
+          연령대: ageTag ? [ageTag] : [],
+          소득분위: incomeTag ? [incomeTag] : [],
+          지역: profile.region ? [profile.region] : [],
+          가구형태: labelsFor(HOUSEHOLD_OPTIONS, profile.householdTypes),
+          특수조건: labelsFor(SPECIAL_OPTIONS, profile.specialConditions),
+          관심분야: profile.interests || [],
+        }));
+      })
+      .catch(() => {});
+    return undefined;
+  }, [token, user]);
+
+  const handleCheckId = async () => {
+    try {
+      const result = await checkLoginId(account.loginId.trim());
+      setFormMessage(result.available ? '사용할 수 있는 아이디입니다.' : '이미 사용 중인 아이디입니다.');
+    } catch (error) {
+      setFormMessage(error.message);
+    }
+  };
+
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    console.log('회원가입 정보 제출', selectedTags); 
-    alert('회원가입 완료! (실제 로직 구현 필요)');
-    // ⭐ 메인 페이지로 이동 ⭐
-    navigate('/'); 
+    const ageMap = { '20대': 25, '30대': 35, '40대': 45, '50대': 55, '60대 이상': 65 };
+    const age = ageMap[selectedTags.연령대[0]];
+    const region = selectedTags.지역[0];
+    const income = Number.parseInt(selectedTags.소득분위[0], 10);
+    if (!age || !region || !income) {
+      setFormMessage('추천에 사용할 연령대, 지역, 소득분위를 각각 하나 이상 선택해 주세요.');
+      return;
+    }
+    const profile = {
+      age,
+      region,
+      incomeBracket: income,
+      householdTypes: codesFor(HOUSEHOLD_OPTIONS, selectedTags.가구형태),
+      specialConditions: codesFor(SPECIAL_OPTIONS, selectedTags.특수조건),
+      interests: selectedTags.관심분야,
+    };
+    try {
+      let sessionUser = user;
+      let sessionToken = token;
+      if (!sessionUser) {
+        if (!account.password) {
+          setFormMessage('비밀번호를 입력해 주세요.');
+          return;
+        }
+        const session = await signup({
+          name: account.name.trim(),
+          loginId: account.loginId.trim(),
+          password: account.password,
+          dateOfBirth: account.dateOfBirth.trim(),
+          email: account.email.trim(),
+          region,
+          incomeBracket: income,
+        });
+        setSession(session.token, session.user);
+        sessionUser = session.user;
+        sessionToken = session.token;
+      } else {
+        const updated = await updateAccount(sessionToken, {
+          name: account.name.trim(),
+          email: account.email.trim(),
+          dateOfBirth: account.dateOfBirth.trim(),
+          region,
+          incomeBracket: income,
+        });
+        setSession(sessionToken, updated.user);
+      }
+      await saveProfile(sessionUser.id, sessionToken, profile);
+      setFormMessage('회원 정보와 추천 프로필을 저장했습니다.');
+      navigate('/');
+    } catch (error) {
+      setFormMessage(error.message);
+    }
   };
 
   return (
@@ -68,7 +175,7 @@ const RegisterPage = () => {
       
       <div className={styles.content}>
         <h1 className={styles.logo}>MOABOM</h1>
-        <p className={styles.subtitle}>회원 정보를 입력해주세요.</p>
+        <p className={styles.subtitle}>회원 정보를 입력해주세요. 연령대, 지역, 소득분위, 가구 형태, 특수조건이 추천 자격 검증에 사용됩니다.</p>
 
         <form className={styles.form} onSubmit={handleRegisterSubmit}>
           
@@ -76,30 +183,30 @@ const RegisterPage = () => {
           
           <div className={styles.inputGroup}>
             <label><span className={styles.required}>*</span> 이름</label>
-            <InputField type="text" fullWidth={true} />
+            <InputField type="text" fullWidth={true} value={account.name} onChange={updateField('name')} />
           </div>
           
           <div className={styles.inputGroup}>
             <label><span className={styles.required}>*</span> 아이디</label>
             <div className={styles.idInputContainer}>
-              <InputField type="text" /> 
-              <button type="button" className={styles.checkButton}>중복 확인</button>
+              <InputField type="text" value={account.loginId} onChange={updateField('loginId')} readOnly={Boolean(user)} /> 
+              <button type="button" className={styles.checkButton} onClick={handleCheckId}>중복 확인</button>
             </div>
           </div>
           
           <div className={styles.inputGroup}>
             <label><span className={styles.required}>*</span> 비밀번호</label>
-            <InputField type="password" fullWidth={true} />
+            <InputField type="password" fullWidth={true} value={account.password} onChange={updateField('password')} />
           </div>
           
           <div className={styles.inputGroup}>
             <label><span className={styles.required}>*</span> 생년월일</label>
-            <InputField type="text" placeholder="YYYYMMDD" fullWidth={true} />
+            <InputField type="text" placeholder="YYYYMMDD" fullWidth={true} value={account.dateOfBirth} onChange={updateField('dateOfBirth')} />
           </div>
           
           <div className={styles.inputGroup}>
             <label><span className={styles.required}>*</span> 이메일</label>
-            <InputField type="email" fullWidth={true} />
+            <InputField type="email" fullWidth={true} value={account.email} onChange={updateField('email')} />
           </div>
           
           {/* ----- 추가 정보 섹션 (태그 버튼) ----- */}
@@ -125,13 +232,13 @@ const RegisterPage = () => {
           <div className={styles.buttonSection}>
             <label className={styles.tagLabel}>가구 형태</label>
             <div className={styles.buttonRow}>
-              {['1인 가구', '신혼 부부', '다자녀', '한부모'].map((tag) => (
-                <TagButton 
-                    key={tag} 
-                    isSelected={selectedTags.가구형태.includes(tag)} 
-                    onClick={() => handleTagClick('가구형태', tag)}
+              {HOUSEHOLD_OPTIONS.map((option) => (
+                <TagButton
+                    key={option.code}
+                    isSelected={selectedTags.가구형태.includes(option.label)}
+                    onClick={() => handleTagClick('가구형태', option.label)}
                 >
-                    {tag}
+                    {option.label}
                 </TagButton>
               ))}
             </div>
@@ -157,7 +264,7 @@ const RegisterPage = () => {
           <div className={styles.buttonSection}>
             <label className={styles.tagLabel}>지역</label>
             <div className={styles.buttonRow}>
-              {['서울', '경기', '인천', '부산', '기타'].map((tag) => (
+              {['예시특별시', '예시도', '전국(예시)'].map((tag) => (
                 <TagButton 
                     key={tag} 
                     isSelected={selectedTags.지역.includes(tag)}
@@ -169,17 +276,32 @@ const RegisterPage = () => {
             </div>
           </div>
           
+          <div className={styles.buttonSection}>
+            <label className={styles.tagLabel}>관심 분야</label>
+            <div className={styles.buttonRow}>
+              {['주거', '취업', '교육', '자산형성'].map((tag) => (
+                <TagButton
+                    key={tag}
+                    isSelected={selectedTags.관심분야.includes(tag)}
+                    onClick={() => handleTagClick('관심분야', tag)}
+                >
+                    {tag}
+                </TagButton>
+              ))}
+            </div>
+          </div>
+
           {/* 특수조건 섹션 */}
           <div className={styles.buttonSection}>
             <label className={styles.tagLabel}>특수조건</label>
             <div className={styles.buttonRow}>
-              {['장애인', '국가유공자', '신혼', '다자녀', '기타'].map((tag) => (
-                <TagButton 
-                    key={tag} 
-                    isSelected={selectedTags.특수조건.includes(tag)}
-                    onClick={() => handleTagClick('특수조건', tag)}
+              {SPECIAL_OPTIONS.map((option) => (
+                <TagButton
+                    key={option.code}
+                    isSelected={selectedTags.특수조건.includes(option.label)}
+                    onClick={() => handleTagClick('특수조건', option.label)}
                 >
-                    {tag}
+                    {option.label}
                 </TagButton>
               ))}
             </div>
@@ -194,6 +316,7 @@ const RegisterPage = () => {
               회원가입하기
             </button>
           </div>
+          {formMessage && <p className={styles.subtitle}>{formMessage}</p>}
 
         </form>
       </div>
