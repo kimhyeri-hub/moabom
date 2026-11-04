@@ -57,6 +57,7 @@ public class PutProfileHandler
             body.put("incomeBracket", profile.incomeBracket());
         body.put("householdTypes", profile.householdTypes());
         body.put("specialConditions", profile.specialConditions());
+            body.put("interests", profile.interests());
             body.put("created", created);
             body.put("localDevOnly", true);
             return body;

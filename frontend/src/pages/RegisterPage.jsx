@@ -50,20 +50,23 @@ const RegisterPage = () => {
   const handleTagClick = (group, value) => {
       setSelectedTags(prev => {
           const currentArray = prev[group] || [];
-          
+          const single = group === '연령대' || group === '소득분위' || group === '지역';
+          if (single) {
+              return {
+                  ...prev,
+                  [group]: currentArray.includes(value) ? [] : [value],
+              };
+          }
           if (currentArray.includes(value)) {
-              // 제거 (해제)
               return {
                   ...prev,
                   [group]: currentArray.filter(tag => tag !== value)
               };
-          } else {
-              // 추가 (선택)
-              return {
-                  ...prev,
-                  [group]: [...currentArray, value]
-              };
           }
+          return {
+              ...prev,
+              [group]: [...currentArray, value]
+          };
       });
   };
 
@@ -72,6 +75,8 @@ const RegisterPage = () => {
   };
 
   const [formMessage, setFormMessage] = useState('');
+  const [loadedAge, setLoadedAge] = useState(null);
+  const editing = Boolean(user);
 
   useEffect(() => {
     if (user) {
@@ -86,10 +91,19 @@ const RegisterPage = () => {
     if (!user || !token) {
       return undefined;
     }
+    let active = true;
     getProfile(user.id, token)
       .then((profile) => {
-        const ageTag = profile.age >= 60 ? '60대 이상' : `${Math.floor(profile.age / 10)}0대`;
-        const incomeTag = `${profile.incomeBracket}분위`;
+        if (!active) {
+          return;
+        }
+        const ageTag = profile.age == null
+          ? ''
+          : profile.age >= 60
+            ? '60대 이상'
+            : `${Math.floor(profile.age / 10)}0대`;
+        const incomeTag = profile.incomeBracket == null ? '' : `${profile.incomeBracket}분위`;
+        setLoadedAge(profile.age ?? null);
         setSelectedTags((current) => ({
           ...current,
           연령대: ageTag ? [ageTag] : [],
@@ -100,8 +114,17 @@ const RegisterPage = () => {
           관심분야: profile.interests || [],
         }));
       })
-      .catch(() => {});
-    return undefined;
+      .catch((error) => {
+        if (!active) {
+          return;
+        }
+        setFormMessage(error.status === 404
+          ? '저장된 추천 프로필이 없습니다. 연령대, 지역, 소득분위를 선택한 뒤 저장해 주세요.'
+          : error.message);
+      });
+    return () => {
+      active = false;
+    };
   }, [token, user]);
 
   const handleCheckId = async () => {
@@ -116,7 +139,7 @@ const RegisterPage = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     const ageMap = { '20대': 25, '30대': 35, '40대': 45, '50대': 55, '60대 이상': 65 };
-    const age = ageMap[selectedTags.연령대[0]];
+    const age = ageMap[selectedTags.연령대[0]] || (editing ? loadedAge : undefined);
     const region = selectedTags.지역[0];
     const income = Number.parseInt(selectedTags.소득분위[0], 10);
     if (!age || !region || !income) {
@@ -151,7 +174,10 @@ const RegisterPage = () => {
         setSession(session.token, session.user);
         sessionUser = session.user;
         sessionToken = session.token;
+        await saveProfile(sessionUser.id, sessionToken, profile);
+        setFormMessage('회원 정보와 추천 프로필을 저장했습니다.');
       } else {
+        await saveProfile(sessionUser.id, sessionToken, profile);
         const updated = await updateAccount(sessionToken, {
           name: account.name.trim(),
           email: account.email.trim(),
@@ -160,9 +186,8 @@ const RegisterPage = () => {
           incomeBracket: income,
         });
         setSession(sessionToken, updated.user);
+        setFormMessage('추천 프로필을 저장했습니다.');
       }
-      await saveProfile(sessionUser.id, sessionToken, profile);
-      setFormMessage('회원 정보와 추천 프로필을 저장했습니다.');
       navigate('/');
     } catch (error) {
       setFormMessage(error.message);
@@ -175,7 +200,9 @@ const RegisterPage = () => {
       
       <div className={styles.content}>
         <h1 className={styles.logo}>MOABOM</h1>
-        <p className={styles.subtitle}>회원 정보를 입력해주세요. 연령대, 지역, 소득분위, 가구 형태, 특수조건이 추천 자격 검증에 사용됩니다.</p>
+        <p className={styles.subtitle}>{editing
+          ? '저장된 회원 정보와 추천 프로필을 수정합니다. 관심 분야는 추천의 콘텐츠 유사도에 반영됩니다.'
+          : '회원 정보를 입력해주세요. 연령대, 지역, 소득분위, 가구 형태, 특수조건이 추천 자격 검증에 사용됩니다.'}</p>
 
         <form className={styles.form} onSubmit={handleRegisterSubmit}>
           
@@ -189,15 +216,17 @@ const RegisterPage = () => {
           <div className={styles.inputGroup}>
             <label><span className={styles.required}>*</span> 아이디</label>
             <div className={styles.idInputContainer}>
-              <InputField type="text" value={account.loginId} onChange={updateField('loginId')} readOnly={Boolean(user)} /> 
-              <button type="button" className={styles.checkButton} onClick={handleCheckId}>중복 확인</button>
+              <InputField type="text" value={account.loginId} onChange={updateField('loginId')} readOnly={editing} />
+              {!editing && <button type="button" className={styles.checkButton} onClick={handleCheckId}>중복 확인</button>}
             </div>
           </div>
           
+          {!editing && (
           <div className={styles.inputGroup}>
             <label><span className={styles.required}>*</span> 비밀번호</label>
             <InputField type="password" fullWidth={true} value={account.password} onChange={updateField('password')} />
           </div>
+          )}
           
           <div className={styles.inputGroup}>
             <label><span className={styles.required}>*</span> 생년월일</label>
@@ -216,7 +245,9 @@ const RegisterPage = () => {
           <div className={styles.buttonSection}>
             <label className={styles.tagLabel}>연령대</label>
             <div className={styles.buttonRow}>
-              {['20대', '30대', '40대', '50대', '60대 이상'].map((tag) => (
+              {(selectedTags.연령대[0] && !['20대', '30대', '40대', '50대', '60대 이상'].includes(selectedTags.연령대[0])
+                ? [selectedTags.연령대[0], '20대', '30대', '40대', '50대', '60대 이상']
+                : ['20대', '30대', '40대', '50대', '60대 이상']).map((tag) => (
                 <TagButton 
                     key={tag} 
                     isSelected={selectedTags.연령대.includes(tag)} 
@@ -248,7 +279,9 @@ const RegisterPage = () => {
           <div className={styles.buttonSection}>
             <label className={styles.tagLabel}>소득 분위</label>
             <div className={styles.buttonRow}>
-              {['1분위', '2분위', '3분위', '4분위', '5분위', '6분위'].map((tag) => (
+              {(selectedTags.소득분위[0] && !['1분위', '2분위', '3분위', '4분위', '5분위', '6분위'].includes(selectedTags.소득분위[0])
+                ? [selectedTags.소득분위[0], '1분위', '2분위', '3분위', '4분위', '5분위', '6분위']
+                : ['1분위', '2분위', '3분위', '4분위', '5분위', '6분위']).map((tag) => (
                 <TagButton 
                     key={tag} 
                     isSelected={selectedTags.소득분위.includes(tag)}
@@ -264,7 +297,9 @@ const RegisterPage = () => {
           <div className={styles.buttonSection}>
             <label className={styles.tagLabel}>지역</label>
             <div className={styles.buttonRow}>
-              {['예시특별시', '예시도', '전국(예시)'].map((tag) => (
+              {(selectedTags.지역[0] && !['예시특별시', '예시도', '전국(예시)'].includes(selectedTags.지역[0])
+                ? [selectedTags.지역[0], '예시특별시', '예시도', '전국(예시)']
+                : ['예시특별시', '예시도', '전국(예시)']).map((tag) => (
                 <TagButton 
                     key={tag} 
                     isSelected={selectedTags.지역.includes(tag)}
@@ -313,7 +348,7 @@ const RegisterPage = () => {
               돌아가기
             </button>
             <button type="submit" className={`${styles.buttonBase} ${styles.submitButton}`}>
-              회원가입하기
+              {editing ? '프로필 저장하기' : '회원가입하기'}
             </button>
           </div>
           {formMessage && <p className={styles.subtitle}>{formMessage}</p>}

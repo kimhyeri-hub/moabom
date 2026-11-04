@@ -284,7 +284,7 @@ public final class LocalApiServer {
             headers.put("Vary", "Origin");
         }
         if (preflight) {
-            headers.put("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+            headers.put("Access-Control-Allow-Methods", "GET,PUT,PATCH,POST,DELETE,OPTIONS");
             headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization");
         }
         headers.put("Content-Type", "application/json; charset=utf-8");

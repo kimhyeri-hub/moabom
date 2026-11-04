@@ -66,9 +66,55 @@ class LocalAuthServerTest {
         assertEquals(200, send(client, base, "POST", "/auth/logout", "{}", tokenA).statusCode());
         assertEquals(401, send(client, base, "GET", "/auth/me", null, tokenA).statusCode());
 
+        HttpResponse<String> options = HttpClient.newHttpClient().send(
+                HttpRequest.newBuilder(URI.create(base + "/auth/me"))
+                        .method("OPTIONS", HttpRequest.BodyPublishers.noBody())
+                        .header("Origin", "http://localhost:3000")
+                        .header("Access-Control-Request-Method", "PATCH")
+                        .build(),
+                HttpResponse.BodyHandlers.ofString());
+        assertEquals(204, options.statusCode());
+        assertTrue(options.headers().firstValue("Access-Control-Allow-Methods").orElse("").contains("PATCH"));
+
         HttpResponse<String> chat = send(client, base, "POST", "/chat", "{\"message\":\"청년 지원금\"}", null);
         assertEquals(200, chat.statusCode());
         assertTrue(chat.body().contains("OpenAI는 호출하지 않았습니다"));
+    }
+
+    @Test
+    void profileUpdateStoresInterestsAndChangesRecommendations() throws Exception {
+        server = LocalApiServer.start(0, new AccessTokens("unit-test-secret-not-for-deployment"));
+        HttpClient client = HttpClient.newHttpClient();
+        String base = "http://127.0.0.1:" + server.port();
+        JsonNode created = json(client, base, "POST", "/auth/signup", account("interestUser", "interest@example.com"), null);
+        assertEquals(201, created.get("status").asInt());
+        String token = created.get("body").get("token").asText();
+        String id = created.get("body").get("user").get("id").asText();
+
+        HttpResponse<String> saved = send(client, base, "PUT", "/users/" + id + "/profile",
+                "{\"age\":25,\"region\":\"서울특별시\",\"incomeBracket\":3,\"interests\":[\"주거\"]}", token);
+        assertEquals(201, saved.statusCode());
+        assertTrue(saved.body().contains("주거"));
+        JsonNode loaded = json(client, base, "GET", "/users/" + id + "/profile", null, token);
+        assertEquals(200, loaded.get("status").asInt());
+        assertEquals("주거", loaded.get("body").get("interests").get(0).asText());
+        JsonNode housing = MAPPER.readTree(send(client, base, "GET", "/users/" + id + "/recommendations", null, token).body());
+        assertEquals("주거", housing.get("recommendations").get(0).get("grant").get("categoryTitle").asText());
+
+        assertEquals(200, send(client, base, "PUT", "/users/" + id + "/profile",
+                "{\"age\":25,\"region\":\"서울특별시\",\"incomeBracket\":3,\"householdTypes\":[\"SINGLE\"],\"interests\":[\"교육\"]}",
+                token).statusCode());
+        JsonNode education = MAPPER.readTree(send(client, base, "GET", "/users/" + id + "/recommendations", null, token).body());
+        assertEquals("교육", education.get("recommendations").get(0).get("grant").get("categoryTitle").asText());
+
+        HttpResponse<String> login = send(client, base, "POST", "/auth/login",
+                "{\"loginId\":\"interestUser\",\"password\":\"Moabom-pass-1\"}", null);
+        assertEquals(200, login.statusCode());
+        HttpResponse<String> patched = send(client, base, "PATCH", "/auth/me",
+                "{\"name\":\"수정회원\",\"email\":\"interest@example.com\",\"dateOfBirth\":\"20020304\",\"region\":\"서울특별시\",\"incomeBracket\":3}",
+                token);
+        assertEquals(200, patched.statusCode());
+        assertTrue(patched.body().contains("수정회원"));
     }
 
     private static String account(String loginId, String email) {
